@@ -26,3 +26,8 @@ npm-debug.log*
 
 # TypeScript incremental compilation
 *.tsbuildinfo
+
+# Planning & tracking files
+CHANGELOG.md
+plan.md
+checkpoint.md

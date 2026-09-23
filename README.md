@@ -99,11 +99,18 @@ Use `--help` and `--version` for usage and version information.
 
 ## Examples
 
-See [examples/basic.ts](examples/basic.ts), [examples/deployment.ts](examples/deployment.ts), and [examples/migration.ts](examples/migration.ts).
+See the [examples/](examples/) directory:
+
+- [basic.ts](examples/basic.ts) — read and print Git context
+- [deployment.ts](examples/deployment.ts) — deploy only from clean `main`
+- [migration.ts](examples/migration.ts) — run migrations with branch guard
+- [express.ts](examples/express.ts) — embed Git context in HTTP response headers
+- [ci-guard.ts](examples/ci-guard.ts) — CI pre-deploy validation
+- [release.ts](examples/release.ts) — release script with metadata logging
 
 ## Current scope
 
-The 0.3 release includes the library API, safety guards, and a CLI. Benchmarks, CI/release automation, build metadata, and advanced assertions are planned separately; see [plan.md](plan.md) and [checkpoint.md](checkpoint.md).
+The 0.4 release includes the library API, safety guards, CLI, ESLint, compatibility tests (shallow clones, missing Git), benchmarks, and CI. npm publication, advanced assertions, and build metadata are planned for upcoming releases.
 
 ## License
 

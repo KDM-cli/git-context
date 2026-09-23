@@ -106,7 +106,7 @@ test("--version prints a version string and exits 0", () => {
 // ────────────────────────────────────────────────────────────────────────
 
 test("prints human-readable context for a clean repository", () => {
-  const { root, commit } = createRepository();
+  const { root } = createRepository();
   const shortCommit = runGit(root, ["rev-parse", "--short", "HEAD"]);
 
   const result = runCli([], { cwd: root });
