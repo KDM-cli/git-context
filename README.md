@@ -110,7 +110,7 @@ See the [examples/](examples/) directory:
 
 ## Current scope
 
-The 0.4 release includes the library API, safety guards, CLI, ESLint, compatibility tests (shallow clones, missing Git), benchmarks, and CI. npm publication, advanced assertions, and build metadata are planned separately; see [plan.md](plan.md) and [checkpoint.md](checkpoint.md).
+The 0.4 release includes the library API, safety guards, CLI, ESLint, compatibility tests (shallow clones, missing Git), benchmarks, and CI. npm publication, advanced assertions, and build metadata are planned for upcoming releases.
 
 ## License
 
