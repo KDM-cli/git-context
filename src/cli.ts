@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
 import { getGitContext } from "./git-context.js";
-import {
-  BranchMismatchError,
-  DirtyRepositoryError,
-  GitContextError,
-  GitExecutableNotFoundError,
-  RepositoryNotFoundError,
-} from "./errors/index.js";
+import { GitContextError } from "./errors/index.js";
 
 function printUsage(): void {
   const lines = [
@@ -26,7 +20,7 @@ function printUsage(): void {
 function printVersion(): void {
   // Read from package.json at build time is not available in a pure-ESM
   // single-file CLI, so the version is kept in sync manually.
-  process.stdout.write("0.3.0\n");
+  process.stdout.write("0.4.0\n");
 }
 
 function formatHumanOutput(context: {

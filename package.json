@@ -1,6 +1,6 @@
 {
   "name": "git-context",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Know your Git state from inside Node.js.",
   "keywords": [
     "git",
@@ -36,12 +36,17 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.test.json",
-    "test": "tsx --test tests/git-context.test.ts tests/cli.test.ts",
-    "check": "npm run typecheck && npm test && npm run build"
+    "lint": "eslint src/ tests/",
+    "test": "tsx --test tests/git-context.test.ts tests/cli.test.ts tests/compatibility.test.ts",
+    "bench": "tsx benchmarks/context.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^20.17.0",
+    "eslint": "^10.11.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.70.1"
   }
 }

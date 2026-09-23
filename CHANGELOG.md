@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 - 2026-09-24
+
+Compatibility hardening and project maturity.
+
+- Added compatibility tests: shallow clones, missing Git executable, multiple remotes, frozen context immutability.
+- Added ESLint with typescript-eslint strict rules.
+- Added performance benchmarks (`npm run bench`).
+- Added `npm pack --dry-run` package validation to CI.
+- Added lint step to CI pipeline.
+- Added Express, CI guard, and release examples.
+- Added `CONTRIBUTING.md` with project structure and development workflow.
+- Total test count: 29 (7 library + 14 CLI + 8 compatibility).
+
 ## 0.3.0 - 2026-09-24
 
 CLI release.
