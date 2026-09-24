@@ -64,9 +64,11 @@ test("reads the full context from a nested monorepo directory", () => {
     author: "Test Author",
     email: "test.author@example.com",
     root,
+    commitDate: context.commitDate,
     remote: "origin",
     remoteUrl: "https://example.com/origin.git",
   });
+  assert.match(context.commitDate, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
   assert.equal(Object.isFrozen(context), true);
 });
 

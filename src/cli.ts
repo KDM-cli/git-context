@@ -2,6 +2,7 @@
 
 import { getGitContext } from "./git-context.js";
 import { GitContextError } from "./errors/index.js";
+import type { GitContext } from "./types.js";
 
 function printUsage(): void {
   const lines = [
@@ -20,29 +21,23 @@ function printUsage(): void {
 function printVersion(): void {
   // Read from package.json at build time is not available in a pure-ESM
   // single-file CLI, so the version is kept in sync manually.
-  process.stdout.write("0.4.0\n");
+  process.stdout.write("0.5.0\n");
 }
 
-function formatHumanOutput(context: {
-  branch: string | null;
-  commit: string;
-  shortCommit: string;
-  dirty: boolean;
-  detached: boolean;
-  author: string;
-  email: string;
-  root: string;
-  remote?: string;
-  remoteUrl?: string;
-}): string {
+function formatHumanOutput(context: GitContext): string {
   const lines: string[] = [
     `Branch:       ${context.branch ?? "(detached HEAD)"}`,
     `Commit:       ${context.shortCommit} (${context.commit})`,
+    `Date:         ${context.commitDate}`,
     `Dirty:        ${context.dirty ? "yes" : "no"}`,
     `Detached:     ${context.detached ? "yes" : "no"}`,
     `Author:       ${context.author} <${context.email}>`,
     `Root:         ${context.root}`,
   ];
+
+  if (context.tag !== undefined) {
+    lines.push(`Tag:          ${context.tag}`);
+  }
 
   if (context.remote !== undefined) {
     lines.push(`Remote:       ${context.remote}`);
@@ -50,6 +45,12 @@ function formatHumanOutput(context: {
 
   if (context.remoteUrl !== undefined) {
     lines.push(`Remote URL:   ${context.remoteUrl}`);
+  }
+
+  if (context.ahead !== undefined || context.behind !== undefined) {
+    lines.push(
+      `Tracking:     ${context.ahead ?? 0} ahead, ${context.behind ?? 0} behind`,
+    );
   }
 
   return lines.join("\n");

@@ -63,6 +63,10 @@ if (context.remote) {
 | `author` | `string` | Author name of the `HEAD` commit |
 | `email` | `string` | Author email of the `HEAD` commit |
 | `root` | `string` | Absolute filesystem path to the repository root directory |
+| `commitDate` | `string` | ISO 8601 commit timestamp of `HEAD` |
+| `tag` | `string \| undefined` | Exact tag pointing at `HEAD`, if tagged |
+| `ahead` | `number \| undefined` | Commits ahead of upstream tracking branch, if configured |
+| `behind` | `number \| undefined` | Commits behind upstream tracking branch, if configured |
 | `remote` | `string \| undefined` | Preferred remote name (`origin` when present, otherwise first available) |
 | `remoteUrl` | `string \| undefined` | URL of the preferred remote |
 
@@ -83,7 +87,7 @@ if (git.isRepository()) {
 
 ### 3. Enforcing Safety Guards
 
-Prevent accidental deployments, database migrations, or release publishing from dirty working trees or wrong branches:
+Prevent accidental deployments, database migrations, or release publishing from dirty working trees, untracked changes, or wrong branches:
 
 ```ts
 import { git } from "git-context";
@@ -96,6 +100,15 @@ git.assertClean();
 
 // Enforce both in a single check
 git.requireCleanBranch("main");
+
+// Generic assertion combining multiple criteria:
+git.assert({
+  branch: ["main", "release"], // accept array of allowed branches
+  clean: true,                 // require clean working tree
+  detached: false,             // reject detached HEAD
+  tag: true,                   // require HEAD to have an exact tag (or specific string like "v1.0.0")
+  unpushed: true,              // require no unpushed commits ahead of upstream
+});
 
 // Proceed with sensitive task safely
 await deploy();
@@ -123,17 +136,30 @@ import {
   GitContextError,
   DirtyRepositoryError,
   BranchMismatchError,
+  DetachedHeadError,
+  TagMismatchError,
+  UnpushedCommitsError,
   RepositoryNotFoundError,
   GitExecutableNotFoundError,
 } from "git-context";
 
 try {
-  git.requireCleanBranch("main");
+  git.assert({
+    branch: "main",
+    clean: true,
+    tag: true,
+  });
 } catch (error) {
   if (error instanceof DirtyRepositoryError) {
     console.error("Please commit or stash changes before deploying.");
   } else if (error instanceof BranchMismatchError) {
     console.error(`Expected branch "${error.expected}", but found "${error.actual}".`);
+  } else if (error instanceof DetachedHeadError) {
+    console.error("HEAD is detached; checkout a named branch.");
+  } else if (error instanceof TagMismatchError) {
+    console.error(`Tag requirement failed (expected: ${error.expected}, actual: ${error.actual}).`);
+  } else if (error instanceof UnpushedCommitsError) {
+    console.error(`Please push ${error.ahead} local commit(s) before publishing.`);
   } else if (error instanceof RepositoryNotFoundError) {
     console.error(`No Git repository found from: ${error.cwd}`);
   } else if (error instanceof GitExecutableNotFoundError) {
