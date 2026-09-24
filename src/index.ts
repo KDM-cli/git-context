@@ -1,8 +1,9 @@
 import { assertCleanContext } from "./assertions/clean.js";
 import { requireBranchContext } from "./assertions/branch.js";
+import { assertCriteria } from "./assertions/generic.js";
 import { getGitContext } from "./git-context.js";
 import { isRepository as checkRepository } from "./repository/discover.js";
-import type { GitApi, GitContext, GitOptions } from "./types.js";
+import type { GitApi, GitAssertCriteria, GitContext, GitOptions } from "./types.js";
 
 function getCwd(options?: GitOptions): string {
   return options?.cwd ?? process.cwd();
@@ -36,14 +37,21 @@ export const git: GitApi = Object.assign(gitFunction, {
     requireBranchContext(context, expectedBranch);
     assertCleanContext(context);
   },
+
+  assert(criteria: GitAssertCriteria, options?: GitOptions): void {
+    assertCriteria(readContext(options), criteria);
+  },
 });
 
 export {
   BranchMismatchError,
+  DetachedHeadError,
   DirtyRepositoryError,
   GitCommandError,
   GitContextError,
   GitExecutableNotFoundError,
   RepositoryNotFoundError,
+  TagMismatchError,
+  UnpushedCommitsError,
 } from "./errors/index.js";
-export type { GitApi, GitContext, GitOptions } from "./types.js";
+export type { GitApi, GitAssertCriteria, GitContext, GitOptions } from "./types.js";

@@ -71,3 +71,43 @@ export class BranchMismatchError extends GitContextError {
     this.actual = actual;
   }
 }
+
+/** A safety guard detected that the current commit tag does not match the requirement. */
+export class TagMismatchError extends GitContextError {
+  readonly expected: string | true;
+  readonly actual: string | null;
+
+  constructor(expected: string | true, actual: string | null) {
+    const requirement = expected === true ? "any exact tag" : `tag "${expected}"`;
+    super(
+      "Tag requirement failed.\n\n" +
+        `Current tag:\n${actual ?? "none (untagged)"}\n\n` +
+        `Required:\n${requirement}`,
+    );
+    this.expected = expected;
+    this.actual = actual;
+  }
+}
+
+/** A safety guard detected that HEAD is detached when a branch was required. */
+export class DetachedHeadError extends GitContextError {
+  constructor() {
+    super(
+      "Detached HEAD state.\n\n" +
+        "Expected a named branch, but repository is in a detached HEAD state.",
+    );
+  }
+}
+
+/** A safety guard detected unpushed commits ahead of the tracking branch. */
+export class UnpushedCommitsError extends GitContextError {
+  readonly ahead: number;
+
+  constructor(ahead: number) {
+    super(
+      `Unpushed commits detected (${ahead} commit${ahead === 1 ? "" : "s"} ahead of remote).\n\n` +
+        "Push your local commits to the upstream remote before continuing.",
+    );
+    this.ahead = ahead;
+  }
+}
