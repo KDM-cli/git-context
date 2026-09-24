@@ -1,4 +1,5 @@
 # git-context
+[![CI](https://github.com/KDM-cli/git-context/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/KDM-cli/git-context/actions/workflows/ci.yml)
 
 **Know your Git state from inside Node.js.**
 
