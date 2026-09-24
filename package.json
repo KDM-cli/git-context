@@ -35,7 +35,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.test.json",
-    "lint": "NODE_OPTIONS=\"--require ./scripts/eslint-ts-compat.cjs\" eslint src/ tests/",
+    "lint": "eslint src/ tests/",
     "test": "tsx --test tests/git-context.test.ts tests/cli.test.ts tests/compatibility.test.ts tests/extended.test.ts",
     "bench": "tsx benchmarks/context.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build"
@@ -43,10 +43,9 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^20.17.0",
-    "@typescript/typescript6": "^6.0.2",
     "eslint": "^10.11.0",
     "tsx": "^4.19.2",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1"
   }
 }
