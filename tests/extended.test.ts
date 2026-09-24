@@ -9,10 +9,13 @@ import {
   BranchMismatchError,
   DetachedHeadError,
   DirtyRepositoryError,
+  GitCommandError,
   TagMismatchError,
   UnpushedCommitsError,
   git,
 } from "../src/index.js";
+import { getExactTag } from "../src/commands/tag.js";
+import { getTrackingStatus } from "../src/commands/tracking.js";
 
 const temporaryDirectories: string[] = [];
 
@@ -244,7 +247,36 @@ test("git.assert enforces tag requirements", () => {
   );
 });
 
-test("git.assert enforces unpushed commits check", () => {
+test("git.assert validates requested tag when multiple tags point at HEAD", () => {
+  const { root } = createRepository();
+
+  // Create an annotated tag and a lightweight tag on the same commit
+  runGit(root, ["tag", "-a", "v0.5.0", "-m", "Release v0.5.0"]);
+  runGit(root, ["tag", "release-2026"]);
+
+  // Both should be valid exact tags for HEAD
+  assert.doesNotThrow(() => {
+    git.assert({ tag: "v0.5.0" }, { cwd: root });
+  });
+
+  assert.doesNotThrow(() => {
+    git.assert({ tag: "release-2026" }, { cwd: root });
+  });
+
+  // Non-matching tag throws TagMismatchError
+  assert.throws(
+    () => {
+      git.assert({ tag: "v1.0.0" }, { cwd: root });
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof TagMismatchError);
+      assert.equal(error.expected, "v1.0.0");
+      return true;
+    },
+  );
+});
+
+test("git.assert enforces unpushed commits check with upstream tracking branch", () => {
   const remoteDir = createTemporaryDirectory("git-context-remote-");
   runGit(remoteDir, ["init", "--bare", "--initial-branch=main"]);
 
@@ -269,6 +301,74 @@ test("git.assert enforces unpushed commits check", () => {
     (error: unknown) => {
       assert.ok(error instanceof UnpushedCommitsError);
       assert.equal(error.ahead, 1);
+      return true;
+    },
+  );
+});
+
+test("git.assert unpushed fails when repository has no upstream configured", () => {
+  const { root } = createRepository();
+
+  assert.throws(
+    () => {
+      git.assert({ unpushed: true }, { cwd: root });
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof UnpushedCommitsError);
+      assert.equal(error.ahead, undefined);
+      return true;
+    },
+  );
+});
+
+test("git.assert unpushed fails when repository is in detached HEAD state", () => {
+  const { root, commit } = createRepository();
+  runGit(root, ["checkout", commit]);
+
+  assert.throws(
+    () => {
+      git.assert({ unpushed: true }, { cwd: root });
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof UnpushedCommitsError);
+      assert.equal(error.ahead, undefined);
+      return true;
+    },
+  );
+});
+
+test("getExactTag and getTrackingStatus propagate unexpected GitCommandErrors", () => {
+  const { root } = createRepository();
+
+  // Intentionally corrupt git config
+  writeFileSync(join(root, ".git", "config"), "[bad section\n");
+
+  assert.throws(
+    () => {
+      getExactTag(root);
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof GitCommandError);
+      return true;
+    },
+  );
+
+  assert.throws(
+    () => {
+      getExactTag(root, "v1.0.0");
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof GitCommandError);
+      return true;
+    },
+  );
+
+  assert.throws(
+    () => {
+      getTrackingStatus(root);
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof GitCommandError);
       return true;
     },
   );

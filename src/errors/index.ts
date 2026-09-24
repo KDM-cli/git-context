@@ -101,12 +101,15 @@ export class DetachedHeadError extends GitContextError {
 
 /** A safety guard detected unpushed commits ahead of the tracking branch. */
 export class UnpushedCommitsError extends GitContextError {
-  readonly ahead: number;
+  readonly ahead: number | undefined;
 
-  constructor(ahead: number) {
+  constructor(ahead?: number) {
     super(
-      `Unpushed commits detected (${ahead} commit${ahead === 1 ? "" : "s"} ahead of remote).\n\n` +
-        "Push your local commits to the upstream remote before continuing.",
+      ahead !== undefined
+        ? `Unpushed commits detected (${ahead} commit${ahead === 1 ? "" : "s"} ahead of remote).\n\n` +
+          "Push your local commits to the upstream remote before continuing."
+        : "Unpushed commits check failed: no upstream tracking branch configured or HEAD is detached.\n\n" +
+          "Push your branch and configure an upstream tracking branch before continuing.",
     );
     this.ahead = ahead;
   }

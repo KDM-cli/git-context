@@ -6,6 +6,7 @@ import {
   TagMismatchError,
   UnpushedCommitsError,
 } from "../errors/index.js";
+import { getExactTag } from "../commands/tag.js";
 import type { GitAssertCriteria, GitContext } from "../types.js";
 
 /**
@@ -52,7 +53,11 @@ export function assertCriteria(
         throw new TagMismatchError(true, null);
       }
     } else if (typeof criteria.tag === "string") {
-      if (context.tag !== criteria.tag) {
+      const matchingTag =
+        context.tag === criteria.tag
+          ? criteria.tag
+          : getExactTag(context.root, criteria.tag);
+      if (matchingTag !== criteria.tag) {
         throw new TagMismatchError(criteria.tag, context.tag ?? null);
       }
     }
@@ -60,7 +65,7 @@ export function assertCriteria(
 
   // 5. Unpushed commits check
   if (criteria.unpushed === true) {
-    if (context.ahead !== undefined && context.ahead > 0) {
+    if (context.ahead === undefined || context.ahead > 0) {
       throw new UnpushedCommitsError(context.ahead);
     }
   }

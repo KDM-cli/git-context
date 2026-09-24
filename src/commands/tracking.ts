@@ -25,7 +25,15 @@ export function getTrackingStatus(cwd: string): {
     return {};
   } catch (error: unknown) {
     if (error instanceof GitCommandError) {
-      return {};
+      const stderr = error.stderr.toLowerCase();
+      if (
+        stderr.includes("no upstream") ||
+        stderr.includes("does not point to a branch") ||
+        stderr.includes("not stored as a remote-tracking branch") ||
+        stderr.includes("@{upstream}")
+      ) {
+        return {};
+      }
     }
     throw error;
   }
