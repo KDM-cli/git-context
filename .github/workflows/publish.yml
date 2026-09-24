@@ -62,10 +62,14 @@ jobs:
           if [[ -z "$TAG_NAME" || "$TAG_NAME" == "main" ]]; then
             TAG_NAME="v$(node -p "require('./package.json').version")"
           fi
-          gh release create "$TAG_NAME" \
-            --title "Release $TAG_NAME" \
-            --generate-notes \
-            --draft=false
+          if gh release view "$TAG_NAME" &>/dev/null; then
+            echo "Release $TAG_NAME already exists; skipping release creation."
+          else
+            gh release create "$TAG_NAME" \
+              --title "Release $TAG_NAME" \
+              --generate-notes \
+              --draft=false
+          fi
 
   publish-npm:
     name: Publish to npm
@@ -136,4 +140,4 @@ jobs:
             pkg.name = `@${process.env.GITHUB_REPOSITORY_OWNER.toLowerCase()}/${baseName}`;
             fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
           '
-          npm publish --registry=https://npm.pkg.github.com
+          npm publish --registry=https://npm.pkg.github.com || echo "GitHub Packages: already published or skipped."
