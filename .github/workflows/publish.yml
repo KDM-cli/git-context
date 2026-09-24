@@ -132,9 +132,8 @@ jobs:
           node -e '
             const fs = require("node:fs");
             const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-            if (!pkg.name.startsWith("@")) {
-              pkg.name = `@${process.env.GITHUB_REPOSITORY_OWNER.toLowerCase()}/${pkg.name}`;
-              fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
-            }
+            const baseName = pkg.name.includes("/") ? pkg.name.split("/")[1] : pkg.name;
+            pkg.name = `@${process.env.GITHUB_REPOSITORY_OWNER.toLowerCase()}/${baseName}`;
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
           '
           npm publish --registry=https://npm.pkg.github.com

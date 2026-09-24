@@ -8,7 +8,7 @@
 ## Installation
 
 ```bash
-npm install gitcontext
+npm install @utkarsh2325/git-context
 ```
 
 Node.js 20 or later and the `git` executable are required.
@@ -16,7 +16,7 @@ Node.js 20 or later and the `git` executable are required.
 ## Quick Start
 
 ```ts
-import { git } from "git-context";
+import { git } from "@utkarsh2325/git-context";
 
 const context = git();
 

@@ -1,7 +1,10 @@
 {
-  "name": "gitcontext",
+  "name": "@utkarsh2325/git-context",
   "version": "0.6.0",
   "description": "Know your Git state from inside Node.js.",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "git",
     "context",
@@ -22,8 +25,8 @@
     }
   },
   "bin": {
-    "gitcontext": "./dist/cli.js",
-    "git-context": "./dist/cli.js"
+    "gitcontext": "dist/cli.js",
+    "git-context": "dist/cli.js"
   },
   "files": [
     "dist",
