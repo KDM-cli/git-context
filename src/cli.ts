@@ -134,7 +134,7 @@ function printUsage(): void {
 }
 
 function printVersion(): void {
-  process.stdout.write("0.6.0\n");
+  process.stdout.write("0.6.1\n");
 }
 
 // ────────────────────────────────────────────────────────────────────────
