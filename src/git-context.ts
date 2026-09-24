@@ -2,8 +2,11 @@ import { getCommitAuthor } from "./commands/author.js";
 import { getBranchState } from "./commands/branch.js";
 import { getCommit, getShortCommit } from "./commands/commit.js";
 import { getCommitDate } from "./commands/date.js";
+import { hasMergeConflict } from "./commands/merge-conflict.js";
 import { getRemoteInfo } from "./commands/remote.js";
+import { getStashCount } from "./commands/stash.js";
 import { isWorkingTreeDirty } from "./commands/status.js";
+import { getSubmodules } from "./commands/submodules.js";
 import { getExactTag } from "./commands/tag.js";
 import { getTrackingStatus } from "./commands/tracking.js";
 import { discoverRepository } from "./repository/discover.js";
@@ -28,8 +31,12 @@ export function getGitContext(cwd: string): GitContext {
     email,
     root,
     commitDate: getCommitDate(root),
+    stashCount: getStashCount(root),
+    mergeConflict: hasMergeConflict(root),
+    submodules: getSubmodules(root),
     ...(tag !== undefined ? { tag } : {}),
     ...tracking,
     ...remote,
   });
 }
+

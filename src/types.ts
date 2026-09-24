@@ -1,3 +1,6 @@
+import type { SubmoduleInfo } from "./commands/submodules.js";
+export type { SubmoduleInfo };
+
 /** A read-only snapshot of the Git repository containing the current directory. */
 export interface GitContext {
   /** Current branch, or `null` when `HEAD` is detached. */
@@ -28,6 +31,12 @@ export interface GitContext {
   readonly ahead?: number;
   /** Number of commits behind upstream tracking branch, if configured. */
   readonly behind?: number;
+  /** Number of stash entries saved in the repository. */
+  readonly stashCount: number;
+  /** Whether the repository is in a merge conflict state (has unmerged files). */
+  readonly mergeConflict: boolean;
+  /** Information about configured submodules, empty array if none. */
+  readonly submodules: readonly SubmoduleInfo[];
 }
 
 /**
@@ -62,4 +71,10 @@ export interface GitApi {
   requireBranch(expectedBranch: string, options?: GitOptions): void;
   requireCleanBranch(expectedBranch: string, options?: GitOptions): void;
   assert(criteria: GitAssertCriteria, options?: GitOptions): void;
+  /** Assert criteria from a `.gitcontextrc.json` config file. */
+  assertFromConfig(options?: GitOptions): void;
+  /** Load configuration from `.gitcontextrc.json` or `package.json#gitContext`. */
+  loadConfig(options?: GitOptions): import("./config.js").GitContextConfig | undefined;
+  /** Create a watcher that polls repository state and emits change events. */
+  watch(options?: import("./watch.js").WatchOptions): import("./watch.js").GitWatcher;
 }

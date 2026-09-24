@@ -65,6 +65,9 @@ test("reads the full context from a nested monorepo directory", () => {
     email: "test.author@example.com",
     root,
     commitDate: context.commitDate,
+    stashCount: 0,
+    mergeConflict: false,
+    submodules: [],
     remote: "origin",
     remoteUrl: "https://example.com/origin.git",
   });

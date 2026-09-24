@@ -1,9 +1,13 @@
 import { assertCleanContext } from "./assertions/clean.js";
 import { requireBranchContext } from "./assertions/branch.js";
 import { assertCriteria } from "./assertions/generic.js";
+import { loadConfig } from "./config.js";
 import { getGitContext } from "./git-context.js";
 import { isRepository as checkRepository } from "./repository/discover.js";
+import { createWatcher } from "./watch.js";
 import type { GitApi, GitAssertCriteria, GitContext, GitOptions } from "./types.js";
+import type { WatchOptions, GitWatcher } from "./watch.js";
+import type { GitContextConfig } from "./config.js";
 
 function getCwd(options?: GitOptions): string {
   return options?.cwd ?? process.cwd();
@@ -41,6 +45,22 @@ export const git: GitApi = Object.assign(gitFunction, {
   assert(criteria: GitAssertCriteria, options?: GitOptions): void {
     assertCriteria(readContext(options), criteria);
   },
+
+  assertFromConfig(options?: GitOptions): void {
+    const cwd = getCwd(options);
+    const config = loadConfig(cwd);
+    if (config?.assertions !== undefined) {
+      assertCriteria(readContext(options), config.assertions);
+    }
+  },
+
+  loadConfig(options?: GitOptions): GitContextConfig | undefined {
+    return loadConfig(getCwd(options));
+  },
+
+  watch(options?: WatchOptions): GitWatcher {
+    return createWatcher(options);
+  },
 });
 
 export {
@@ -54,4 +74,6 @@ export {
   TagMismatchError,
   UnpushedCommitsError,
 } from "./errors/index.js";
-export type { GitApi, GitAssertCriteria, GitContext, GitOptions } from "./types.js";
+export type { GitApi, GitAssertCriteria, GitContext, GitOptions, SubmoduleInfo } from "./types.js";
+export type { WatchOptions, GitWatcher } from "./watch.js";
+export type { GitContextConfig } from "./config.js";

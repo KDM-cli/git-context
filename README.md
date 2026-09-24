@@ -67,6 +67,9 @@ if (context.remote) {
 | `tag` | `string \| undefined` | Exact tag pointing at `HEAD`, if tagged |
 | `ahead` | `number \| undefined` | Commits ahead of upstream tracking branch, if configured |
 | `behind` | `number \| undefined` | Commits behind upstream tracking branch, if configured |
+| `stashCount` | `number` | Number of stash entries saved in the repository |
+| `mergeConflict` | `boolean` | `true` if unmerged files exist (merge conflict state) |
+| `submodules` | `readonly SubmoduleInfo[]` | List of submodules with paths, commit SHAs, and dirty states |
 | `remote` | `string \| undefined` | Preferred remote name (`origin` when present, otherwise first available) |
 | `remoteUrl` | `string \| undefined` | URL of the preferred remote |
 
@@ -114,7 +117,62 @@ git.assert({
 await deploy();
 ```
 
-### 4. Inspecting Another Directory (`cwd`)
+### 4. Watch Mode (Event-Driven)
+
+React to Git changes in real time (e.g. for development servers, watch scripts, or live status displays):
+
+```ts
+import { git } from "git-context";
+
+const watcher = git.watch({ interval: 1000 });
+
+// Fired whenever commit, branch, or dirty state changes
+watcher.on("change", (newContext, oldContext) => {
+  console.log(`Repository changed: ${oldContext.shortCommit} → ${newContext.shortCommit}`);
+});
+
+// Fired when working tree transitions from clean to dirty
+watcher.on("dirty", (context) => {
+  console.warn("Working tree has uncommitted changes!");
+});
+
+// Fired when working tree transitions back to clean
+watcher.on("clean", (context) => {
+  console.log("Working tree is now clean.");
+});
+
+// Stop polling when done
+watcher.stop();
+```
+
+### 5. Configuration File Support
+
+Define repository assertion rules in `.gitcontextrc.json` or `package.json#gitContext` and enforce them with a single line:
+
+```json
+{
+  "$schema": "https://github.com/KDM-cli/git-context",
+  "assertions": {
+    "branch": "main",
+    "clean": true,
+    "detached": false,
+    "unpushed": true
+  },
+  "format": "table"
+}
+```
+
+```ts
+import { git } from "git-context";
+
+// Enforce rules defined in configuration:
+git.assertFromConfig();
+
+// Or load the parsed config object directly:
+const config = git.loadConfig();
+```
+
+### 6. Inspecting Another Directory (`cwd`)
 
 By default, `git-context` discovers the repository enclosing `process.cwd()`. Pass `{ cwd }` to any method to inspect a different repository, submodule, or workspace:
 
@@ -126,7 +184,7 @@ const repoContext = git({ cwd: "/srv/release-checkout" });
 git.requireCleanBranch("main", { cwd: "/srv/release-checkout" });
 ```
 
-### 5. Error Handling
+### 7. Error Handling
 
 `git-context` throws dedicated, typed errors extending `GitContextError`:
 
@@ -170,7 +228,7 @@ try {
 }
 ```
 
-### 6. Command Line Interface (CLI)
+### 8. Command Line Interface (CLI)
 
 Run `git-context` directly from the terminal without installing:
 
@@ -178,53 +236,37 @@ Run `git-context` directly from the terminal without installing:
 npx git-context
 ```
 
-Human-readable output:
-```text
-Branch:       main
-Commit:       a1b2c3d (a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0)
-Dirty:        no
-Detached:     no
-Author:       Jane Doe <jane@example.com>
-Root:         /home/jane/project
-Remote:       origin
-Remote URL:   https://github.com/jane/project.git
-```
+#### Output Formats
 
-#### JSON Output
-
-Use `--json` for scripts and CI/CD pipelines:
+- **Table (default)**: Color-coded, aligned table output displaying branch, commit, dirty status, author, remotes, tracking, stash count, merge conflict alerts, and submodules.
+- **Minimal (`--format=minimal`)**: Compact one-liner with color highlights, ideal for terminal prompts and status lines (e.g., `main* a1b2c3d [1↑0↓]`).
+- **JSON (`--json` or `--format=json`)**: Machine-readable JSON for CI/CD pipelines and scripting.
 
 ```bash
+# Compact format
+npx git-context --format=minimal
+
+# Disable ANSI colors
+npx git-context --no-color
+
+# Output JSON
 npx git-context --json
 ```
 
-Output:
-```json
-{
-  "branch": "main",
-  "commit": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-  "shortCommit": "a1b2c3d",
-  "dirty": false,
-  "detached": false,
-  "author": "Jane Doe",
-  "email": "jane@example.com",
-  "root": "/home/jane/project",
-  "remote": "origin",
-  "remoteUrl": "https://github.com/jane/project.git"
-}
-```
+#### Scaffold Configuration (`init`)
 
-Use in shell scripts with `jq`:
+Generate a `.gitcontextrc.json` configuration file and a sample `scripts/deploy-guard.ts` guard script:
 
 ```bash
-COMMIT=$(npx git-context --json | jq -r '.shortCommit')
-IS_DIRTY=$(npx git-context --json | jq -r '.dirty')
+npx git-context init
 ```
 
 Flags:
+- `--format=<format>`: Output format: `table` (default), `json`, `minimal`
+- `--json`: Output machine-readable JSON (alias for `--format=json`)
+- `--no-color`: Disable colored output
 - `-h`, `--help`: Show usage and options
 - `--version`: Show version number
-- `--json`: Output machine-readable JSON
 
 ## Examples
 
